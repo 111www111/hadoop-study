@@ -2,8 +2,7 @@ package com.wyt.hdfs;
 
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -11,6 +10,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 
 /**
  * 客户算代码常用套路
@@ -30,7 +30,7 @@ public class HDFSClient {
     public void init() {
         Configuration configuration = new Configuration();
         //设置副本数
-        configuration.set("dfs.replication","2");
+        configuration.set("dfs.replication", "2");
         try {
             //获取客户端对象
             fsClient = FileSystem.get(
@@ -41,8 +41,8 @@ public class HDFSClient {
                     //设置用户
                     "root"
             );
-        }catch (Exception e){
-            System.out.println(e+e.getMessage());
+        } catch (Exception e) {
+            System.out.println(e + e.getMessage());
         }
 
     }
@@ -51,9 +51,9 @@ public class HDFSClient {
      * 封装关闭资源
      */
     @After
-    public void close(){
+    public void close() {
         //关闭资源
-        if(fsClient!=null){
+        if (fsClient != null) {
             try {
                 fsClient.close();
             } catch (IOException e) {
@@ -104,4 +104,63 @@ public class HDFSClient {
         );
     }
 
+    /**
+     * 删除
+     */
+    @Test
+    public void testRm() throws Exception {
+        // path:路径，b:是否递归
+        //当然，如果你这里路径下还有文件且不是递归，会报错
+        fsClient.delete(new Path("/fromJava"), true);
+    }
+
+    /**
+     * 文件的重命名与移动
+     */
+    @Test
+    public void testMv() throws IOException {
+        //源文件路径，目标文件路径
+        fsClient.rename(
+                new Path("/sanguo/shuguo1.txt"),
+                new Path("/sanguo/shuguo.txt")
+        );
+    }
+
+    /**
+     * 获取文件详情
+     */
+    @Test
+    public void getFileList() throws IOException {
+        //获取所有文件信息
+        // 路径，是否递归
+        RemoteIterator<LocatedFileStatus> fileList = fsClient.listFiles(new Path("/"), true);
+        //遍历迭代器
+        while (fileList.hasNext()) {
+            LocatedFileStatus next = fileList.next();
+            System.out.println("----------------------");
+            System.out.println("路径：" + next.getPath());
+            System.out.println("权限：" + next.getPermission());
+            System.out.println("用户：" + next.getOwner());
+            System.out.println("分组：" + next.getGroup());
+            System.out.println("大小：" + next.getLen());
+            System.out.println("时间" + next.getModificationTime());
+            System.out.println("副本：" + next.getReplication());
+            System.out.println("块大小：" + next.getBlockSize());
+            System.out.println("文件名称：" + next.getPath().getName());
+            System.out.println("（块）存储位置：" + Arrays.toString(next.getBlockLocations()));
+        }
+    }
+
+    /**
+     * 判断是文件夹还是文件
+     */
+    @Test
+    public void testFile() throws IOException {
+        FileStatus[] fileStatuses = fsClient.listStatus(new Path("/"));
+        for (FileStatus fileStatus : fileStatuses) {
+            if (fileStatus.isFile()){
+                System.out.println(fileStatus.getPath().getName());
+            }
+        }
+    }
 }
