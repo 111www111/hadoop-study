@@ -1,4 +1,4 @@
-package com.wyt.hdfs;
+package com.wyt.mapreducer;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
