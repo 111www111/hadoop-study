@@ -1,6 +1,7 @@
 package com.wyt.work_count;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -10,15 +11,30 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.util.Tool;
+import org.apache.hadoop.util.ToolRunner;
 
+import javax.lang.model.SourceVersion;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Set;
 
 
-public class WorkCountJob {
+public class WorkCountJob extends Configured implements Tool {
 
     public static void main(String[] args) throws Exception {
+        //run方法接受run中的返回1or0
+        int run = ToolRunner.run(new WorkCountJob(), args);
+        System.out.println(run);
+    }
+
+    @Override
+    public int run(String[] args) throws Exception {
         //注册
-        Job job = Job.getInstance(new Configuration());
+        Configuration entries = new Configuration();
+        entries.set("fs.defaultFS","hdfs://192.168.10.104:9000");
+        Job job = Job.getInstance(entries);
         //2.设置jar路径
         job.setJarByClass(WorkCountJob.class);
         //3.关联map 关联reducer
@@ -31,10 +47,10 @@ public class WorkCountJob {
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(IntWritable.class);
         //6.设置输入路径和输出路径
-        FileInputFormat.setInputPaths(job,new Path("C:\\Users\\13169\\Desktop\\input"));
-        FileOutputFormat.setOutputPath(job,new Path("C:\\Users\\13169\\Desktop\\output"));
-        //7.提交job
-        System.exit(job.waitForCompletion(true) ? 0 : 1);
+        FileInputFormat.setInputPaths(job,new Path("/111.txt"));
+        FileOutputFormat.setOutputPath(job,new Path("/out"));
+        //7.提交job 执行作业 并且 等待执行结束 run方法 返回值是int  1就是成功  0 就是失败
+        return job.waitForCompletion(true)?1:0;
     }
 
     /***

@@ -31,11 +31,12 @@ public class HDFSClient {
         Configuration configuration = new Configuration();
         //设置副本数
         configuration.set("dfs.replication", "2");
+        configuration.set("fs.defaultFS","hdfs://192.168.10.104:9000");
         try {
             //获取客户端对象
             fsClient = FileSystem.get(
                     //NameNode的通讯URI
-                    new URI("hdfs://192.168.10.101:8020"),
+                    new URI("hdfs://192.168.10.104:9000"),
                     //配置文件
                     configuration,
                     //设置用户
@@ -82,10 +83,10 @@ public class HDFSClient {
         // Path[] srcs, -> 元数据路径
         // Path dst -> hadoop目的路径
         fsClient.copyFromLocalFile(
+                false,
                 true,
-                true,
-                new Path("testFile.txt"),
-                new Path("/fromJava"));
+                new Path("C:\\Users\\13169\\Desktop\\input\\111.txt"),
+                new Path("/"));
     }
 
     /**
@@ -111,7 +112,7 @@ public class HDFSClient {
     public void testRm() throws Exception {
         // path:路径，b:是否递归
         //当然，如果你这里路径下还有文件且不是递归，会报错
-        fsClient.delete(new Path("/fromJava"), true);
+        fsClient.delete(new Path("/tmp"), true);
     }
 
     /**
